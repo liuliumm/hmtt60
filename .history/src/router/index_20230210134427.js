@@ -3,7 +3,9 @@ import Vue from 'vue'
 // 1. 下载vue-router  (yarn add vue-router)
 // 2. 引入
 import VueRouter from 'vue-router'
-import { NavBar, Form, Field, Button, Toast, } from 'vant';
+import { NavBar, Form, Field, Button,} from 'vant';
+
+
 
 
 
@@ -13,8 +15,6 @@ Vue.use(NavBar);
 Vue.use(Form);
 Vue.use(Field);
 Vue.use(Button);
-Vue.use(Toast);
-
 
 // 4. 规则数组
 const routes = [
