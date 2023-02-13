@@ -99,7 +99,6 @@ export default {
 
 <style scoped lang="less">
 .home-container {
-  padding-top: 174px;
   padding-bottom: 100px;
   /* 视频问题 */
   /* #这里需要添加deep，这个标签样式并不是我们自己添加的标签所带的样式，

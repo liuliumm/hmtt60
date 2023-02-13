@@ -2,7 +2,7 @@
   <div class="home-container">
     <!-- 导航栏 原本只能通过title属性设置一个导航栏的标题，现在添加一个搜索按钮，需要插槽-->
     <!-- 这样的效果就是将原本标题的位置，换成一个按钮进行显示 -->
-    <van-nav-bar class="page-nav-bar" fixed>
+    <van-nav-bar class="page-nav-bar">
       <!-- 在按钮中增加一个名字为title的插槽 -->
       <!-- 导航组件之导航栏的插槽的名称之一是title -->
       <!-- 按钮的参数的类型为primary info warning danger，选择了info  参数round规定为圆形按钮 -->
@@ -99,7 +99,6 @@ export default {
 
 <style scoped lang="less">
 .home-container {
-  padding-top: 174px;
   padding-bottom: 100px;
   /* 视频问题 */
   /* #这里需要添加deep，这个标签样式并不是我们自己添加的标签所带的样式，
@@ -123,12 +122,7 @@ export default {
   /deep/ .channel-tabs {
     .van-tabs__wrap {
       //这里只需要给父节点channel-tabs添加/deep/,这样下边的子节点都会生效
-      position: fixed;
-      top: 92px;
       height: 82px;
-      z-index: 1;
-      left: 0;
-      right: 0;
     }
 
     .van-tab {
