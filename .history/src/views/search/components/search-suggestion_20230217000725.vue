@@ -1,0 +1,105 @@
+<template>
+  <div>
+    <van-cell
+      v-for="(text, index) in suggestions"
+      :key="index"
+      icon="search"
+    >
+      <template #title>
+        <span v-html="highLight(text)"></span>
+      </template>
+    </van-cell>
+  </div>
+</template>
+
+<script>
+import { getSearchSuggestions } from "@/api/search";
+import { debounce } from "lodash"; // lodash 支持按需加载，有利于打包结果优化
+export default {
+  name: "SearchSuggestion",
+  props: {
+    searchText: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      suggestions: [], // 联想建议数据列表
+    };
+  },
+  watch: {
+    //只要searchText发生变化，我们都需要发起请求，显示最新的联想建议（联想建议会随着输入的内容变化而变化），所以我们需要监听searchText的变化，那么就需要使用watch
+    // searchText:function(){}
+    // searchText(){}
+    // searchText: {
+    //   // 当 searchText 发生改变的时候就会调用 handler 函数
+    //   // 注意：handler 函数名称是固定的
+    //   handler(val) {
+    //     this.loadSearchSuggestions(val);
+    //   },
+    //   // deep: true,
+    //   // 首次监视触发（如果不添加这个属性，那么handler无法监听到第一次searchText的变化）
+    //     immediate: true,  //immediate立即的意思
+    // },
+    searchText: {
+      //监听的值的变化，不管值是从而变为一还是从一变为二。即第二次变化。immediate属性可以改变该现象，该属性必须重启服务器才生效
+      // debounce 函数
+      // 参数1：一个函数
+      // 参数2：延迟时间，单位是毫秒
+      // 返回值：防抖之后的函数
+      handler: debounce(function () {
+        this.loadSearchSuggestions();
+      }, 1000),
+      immediate: true, // 该回调将会在侦听开始之后被立即调用 immediate立刻
+    },
+  },
+
+  methods: {
+    highLight(text) {
+      const highlightStr = `<span class="active">${this.searchText}</span>`
+      // g （全局匹配）
+      // 找到所有的匹配，而不是在第一个匹配之后停止。
+      // i （忽略大小写）
+      // 如果u标志也被启用，使用 Unicode 大小写折叠。
+      const reg = new RegExp(this.searchText, 'gi')
+      // replace() 方法返回一个由替换值（replacement）替换部分或所有的模式（pattern）匹配项后的新字符串。
+      // 模式可以是一个字符串或者一个正则表达式，
+      // 替换值可以是一个字符串或者一个每次匹配都要调用的回调函数。
+      // 如果pattern是字符串，则仅替换第一个匹配项。
+      return text.replace(reg, highlightStr)
+    },
+    async loadSearchSuggestions() {
+      try {
+        const ret = await getSearchSuggestions({ q: this.searchText }); //这里的大括号表示解构后面的函数传递的值
+        // 补充过滤返回空值的处理，视频中没有。
+        // 后台返回的列表中有的项为空，导致展示一个空的项，所以此处过滤掉这种数据
+        // console.log(ret);
+        // it: null 0 是假值会被过滤掉
+        this.suggestions = ret.data.data.options.filter((it) => it);
+        console.log("11:", this.suggestions);
+      } catch (error) {
+        // console.log("error: ", error);
+        this.$toast("获取失败"); //$toast轻提示
+      }
+    },
+    // async getSearchSuggestion() {
+    //   try {
+    //     const ret = await getSearchSuggestion({ q: this.searchText })
+    //     // 思路1: 修改options数据本身 不使用，原因：将来可能还会使用后台返回的数据本身，现在改了将来不好用，还得存两份数据
+    //     // 思路2: 现在仅仅是在显示时候改个呈现，那我们使用函数或者过滤器对数据做一次转换，然后使用转换后的结果进行显示
+    //     // it: null 0 是假值会被过滤掉
+    //     this.suggestions = ret.data.data.options.filter(it => it)
+    //   } catch (error) {
+    //     console.log('error: ', error)
+    //   }
+    // }
+  },
+};
+</script>
+
+<style scoped lang="less">
+.active{
+  color: red;
+}
+</style>

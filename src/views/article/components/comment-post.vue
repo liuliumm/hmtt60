@@ -1,0 +1,106 @@
+<template>
+  <div class="comment-post">
+    <van-field
+      class="post-field"
+      v-model="message"
+      rows="2"
+      autosize
+      type="textarea"
+      maxlength="50"
+      placeholder="请输入留言"
+      show-word-limit
+    />
+    <van-button class="post-btn" @click="onPost" :disabled="!message.length">
+      <!-- disabled="!message.length"  如果没有内容，就禁用 -->
+      发布
+    </van-button>
+  </div>
+</template>
+
+<script>
+import { addComment } from "@/api/comment";
+export default {
+  name: "CommentPost",
+  components: {},
+  //   除了把弹窗关掉之外，还需要把最新的评论添加到评论列表最前面。
+  // ​	但是评论列表数据在文章评论列表组件（comment-list）中。
+  // ​	但是在article/index.vue中需要使用这个数据，要通过子向父传值么？
+  // 这里我们换一种方式：
+  // 我们把评论列表数据之间定义在article/index.vue中，然后把这个变量传递给comment-list.vue子组件，
+  // 让子组件去操作这个数据（子组件通过push往里放数据），当然父组件也可以操作
+  // ​所以将文章评论列表组件（comment-list）中的list数据换成props模式，
+  // 通过父组件index.vue传递过来commentList，这样的话在父组件就可以修改数据了。
+  props: {
+    target: {
+      type: [Number, String, Object],
+      require: true,
+    },
+    articleId: {
+      type: [Number, String, Object],
+      default: null,
+    },
+  },
+  data() {
+    return {
+      message: "",
+    };
+  },
+  computed: {},
+  watch: {},
+  created() {},
+  mounted() {},
+  methods: {
+    async onPost() {
+      this.$toast.loading({
+        message: "发布中...",
+        forbidClick: true, // 禁用背景点击
+        duration: 0, // 持续时间，默认 2000，0 表示持续展示不关闭
+      });
+      try {
+        const { data } = await addComment({
+          target: this.target.toString(), // 评论的目标id（评论文章即为文章id，对评论进行回复则为评论id）
+          content: this.message, // 评论内容
+          // art_id: null, // 文章id，对评论内容发表回复时，需要传递此参数，表明所属文章id。对文章进行评论，不要传此参数。
+          art_id: this.articleId ? this.articleId.toString() : null // 文章id，对评论内容发表回复时，需要传此参数（如果只是评论文章，该参数为null）
+        });
+        // console.log(data);
+        // 关闭弹出层  （这两步在父组件中做）
+        // 将发布内容显示到列表顶部（这两步在父组件中做）
+        // 清空文本框
+        this.message = "";
+        this.$emit("post-success", data.data);
+
+        this.$toast.success("发布成功");
+      } catch (err) {
+        this.$toast.fail("发布失败");
+      }
+    },
+  },
+  onPostSuccess(data) {
+    // 关闭弹出层
+    this.isPostShow = false;
+    // 将发布内容显示到列表顶部
+  },
+};
+</script>
+
+<style scoped lang="less">
+.comment-post {
+  display: flex;
+  align-items: center;
+  padding: 32px 0 32px 32px;
+  .post-field {
+    background-color: #f5f7f9;
+  }
+  .post-btn {
+    width: 150px;
+    border: none;
+    padding: 0;
+    color: #6ba3d8;
+    background: #fff;
+    &::before {
+      display: none;
+    }
+  }
+}
+</style>
